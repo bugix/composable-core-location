@@ -1,5 +1,6 @@
 import Combine
 import CoreLocation
+import DependenciesMacros
 
 /// A wrapper around Core Location's `CLLocationManager` that exposes its functionality through
 /// effects and actions, making it easy to use with the Composable Architecture and easy to test.
@@ -11,10 +12,10 @@ import CoreLocation
 /// import ComposableCoreLocation
 ///
 /// enum AppAction {
-///   case locationManager(LocationManager.Action)
+///     case locationManager(LocationManager.Action)
 ///
-///   // Your domain's other actions:
-///   ...
+///     // Your domain's other actions:
+///     ...
 /// }
 /// ```
 ///
@@ -27,10 +28,10 @@ import CoreLocation
 ///
 /// ```swift
 /// struct AppEnvironment {
-///   var locationManager: LocationManager
+///     var locationManager: LocationManager
 ///
-///   // Your domain's other dependencies:
-///   ...
+///     // Your domain's other dependencies:
+///     ...
 /// }
 /// ```
 ///
@@ -40,22 +41,22 @@ import CoreLocation
 ///
 /// ```swift
 /// let appReducer = Reducer<AppState, AppAction, AppEnvironment> {
-///   state, action, environment in
+///     state, action, environment in
 ///
-///   switch action {
-///   case .onAppear:
-///     return .merge(
-///       environment.locationManager
-///         .delegate()
-///         .map(AppAction.locationManager),
+///     switch action {
+///     case .onAppear:
+///       return .merge(
+///         environment.locationManager
+///           .delegate()
+///           .map(AppAction.locationManager),
 ///
-///       environment.locationManager
-///         .requestWhenInUseAuthorization()
-///         .fireAndForget()
-///     )
+///         environment.locationManager
+///           .requestWhenInUseAuthorization()
+///           .fireAndForget()
+///       )
 ///
 ///   ...
-///   }
+///     }
 /// }
 /// ```
 ///
@@ -68,9 +69,9 @@ import CoreLocation
 /// case .locationManager(.didChangeAuthorization(.authorizedAlways)),
 ///      .locationManager(.didChangeAuthorization(.authorizedWhenInUse)):
 ///
-///   return environment.locationManager
-///     .requestLocation()
-///     .fireAndForget()
+///       return environment.locationManager
+///         .requestLocation()
+///         .fireAndForget()
 /// ```
 ///
 /// If the user denies location access we can show an alert telling them that we need access to be
@@ -80,10 +81,10 @@ import CoreLocation
 /// case .locationManager(.didChangeAuthorization(.denied)),
 ///      .locationManager(.didChangeAuthorization(.restricted)):
 ///
-///   state.alert = """
-///     Please give location access so that we can show you some cool stuff.
-///     """
-///   return .none
+///       state.alert = """
+///           Please give location access so that we can show you some cool stuff.
+///           """
+///       return .none
 /// ```
 ///
 /// Otherwise, we'll be notified of the user's location by handling the `.didUpdateLocations`
@@ -91,7 +92,7 @@ import CoreLocation
 ///
 /// ```swift
 /// case let .locationManager(.didUpdateLocations(locations)):
-///   // Do something cool with user's current location.
+///     // Do something cool with user's current location.
 ///   ...
 /// ```
 ///
@@ -100,7 +101,7 @@ import CoreLocation
 ///
 /// ```swift
 /// case .locationManager:
-///   return .none
+///     return .none
 /// ```
 ///
 /// And finally, when creating the `Store` to power your application you will supply the "live"
@@ -109,12 +110,12 @@ import CoreLocation
 ///
 /// ```swift
 /// let store = Store(
-///   initialState: AppState(),
-///   reducer: appReducer,
-///   environment: AppEnvironment(
-///     locationManager: .live,
-///     // And your other dependencies...
-///   )
+///     initialState: AppState(),
+///     reducer: appReducer,
+///     environment: AppEnvironment(
+///       locationManager: .live,
+///       // And your other dependencies...
+///     )
 /// )
 /// ```
 ///
@@ -134,11 +135,11 @@ import CoreLocation
 ///
 /// ```swift
 /// let store = TestStore(
-///   initialState: AppState(),
-///   reducer: appReducer,
-///   environment: AppEnvironment(
-///     locationManager: .failing
-///   )
+///     initialState: AppState(),
+///     reducer: appReducer,
+///     environment: AppEnvironment(
+///       locationManager: .failing
+///     )
 /// )
 ///
 /// var didRequestInUseAuthorization = false
@@ -146,7 +147,7 @@ import CoreLocation
 ///
 /// store.environment.locationManager.create = { locationManagerSubject.eraseToEffect() }
 /// store.environment.locationManager.requestWhenInUseAuthorization = {
-///   .fireAndForget { didRequestInUseAuthorization = true }
+///     .fireAndForget { didRequestInUseAuthorization = true }
 /// }
 /// ```
 ///
@@ -177,6 +178,7 @@ import CoreLocation
 /// control, and even what happens when the request for their location fails. It is very easy to
 /// write these tests, and we can test deep, subtle properties of our application.
 ///
+@DependencyClient
 public struct LocationManager: Sendable {
     /// Actions that correspond to `CLLocationManagerDelegate` methods.
     ///
@@ -208,25 +210,25 @@ public struct LocationManager: Sendable {
 
     public var accuracyAuthorization: @Sendable () async -> AccuracyAuthorization?
 
-    public var authorizationStatus: @Sendable () async -> CLAuthorizationStatus
+    public var authorizationStatus: @Sendable () async -> CLAuthorizationStatus = { .denied }
 
-    public var delegate: @Sendable () async -> AsyncStream<Action>
+    public var delegate: @Sendable () async -> AsyncStream<Action> = { AsyncStream.never }
 
     public var dismissHeadingCalibrationDisplay: @Sendable () async -> Void
 
     public var heading: @Sendable () async -> Heading?
 
-    public var headingAvailable: @Sendable () async -> Bool
+    public var headingAvailable: @Sendable () async -> Bool = { false }
 
-    public var isRangingAvailable: @Sendable () async -> Bool
+    public var isRangingAvailable: @Sendable () async -> Bool = { false }
 
     public var location: @Sendable () async -> Location?
 
-    public var locationServicesEnabled: @Sendable () async -> Bool
+    public var locationServicesEnabled: @Sendable () async -> Bool = { false }
 
-    public var maximumRegionMonitoringDistance: @Sendable () async -> CLLocationDistance
+    public var maximumRegionMonitoringDistance: @Sendable () async -> CLLocationDistance = { CLLocationDistance.greatestFiniteMagnitude }
 
-    public var monitoredRegions: @Sendable () async -> Set<Region>
+    public var monitoredRegions: @Sendable () async -> Set<Region> = { [] }
 
     public var requestAlwaysAuthorization: @Sendable () async -> Void
 
@@ -238,7 +240,7 @@ public struct LocationManager: Sendable {
 
     public var set: @Sendable (Properties) async -> Void
 
-    public var significantLocationChangeMonitoringAvailable: @Sendable () async -> Bool
+    public var significantLocationChangeMonitoringAvailable: @Sendable () async -> Bool = { false }
 
     public var startMonitoringForRegion: @Sendable (Region) async -> Void
 
@@ -305,29 +307,16 @@ extension LocationManager {
         var showsBackgroundLocationIndicator: Bool? = nil
 
         public static func == (lhs: Self, rhs: Self) -> Bool {
-            var isEqual = true
-            isEqual =
-                isEqual
-                && lhs.activityType == rhs.activityType
+            return lhs.activityType == rhs.activityType
                 && lhs.allowsBackgroundLocationUpdates == rhs.allowsBackgroundLocationUpdates
-            isEqual =
-                isEqual
                 && lhs.desiredAccuracy == rhs.desiredAccuracy
                 && lhs.distanceFilter == rhs.distanceFilter
-            isEqual =
-                isEqual
                 && lhs.headingFilter == rhs.headingFilter
                 && lhs.headingOrientation == rhs.headingOrientation
-            isEqual =
-                isEqual
                 && lhs.pausesLocationUpdatesAutomatically == rhs.pausesLocationUpdatesAutomatically
                 && lhs.showsBackgroundLocationIndicator == rhs.showsBackgroundLocationIndicator
-            return isEqual
         }
 
-        @available(macOS, unavailable)
-        @available(tvOS, unavailable)
-        @available(watchOS, unavailable)
         public init(
             activityType: CLActivityType? = nil,
             allowsBackgroundLocationUpdates: Bool? = nil,
@@ -346,37 +335,6 @@ extension LocationManager {
             self.headingOrientation = headingOrientation
             self.pausesLocationUpdatesAutomatically = pausesLocationUpdatesAutomatically
             self.showsBackgroundLocationIndicator = showsBackgroundLocationIndicator
-        }
-
-        @available(iOS, unavailable)
-        @available(macCatalyst, unavailable)
-        @available(watchOS, unavailable)
-        public init(
-            desiredAccuracy: CLLocationAccuracy? = nil,
-            distanceFilter: CLLocationDistance? = nil
-        ) {
-            self.desiredAccuracy = desiredAccuracy
-            self.distanceFilter = distanceFilter
-        }
-
-        @available(iOS, unavailable)
-        @available(macCatalyst, unavailable)
-        @available(macOS, unavailable)
-        @available(tvOS, unavailable)
-        public init(
-            activityType: CLActivityType? = nil,
-            allowsBackgroundLocationUpdates: Bool? = nil,
-            desiredAccuracy: CLLocationAccuracy? = nil,
-            distanceFilter: CLLocationDistance? = nil,
-            headingFilter: CLLocationDegrees? = nil,
-            headingOrientation: CLDeviceOrientation? = nil
-        ) {
-            self.activityType = activityType
-            self.allowsBackgroundLocationUpdates = allowsBackgroundLocationUpdates
-            self.desiredAccuracy = desiredAccuracy
-            self.distanceFilter = distanceFilter
-            self.headingFilter = headingFilter
-            self.headingOrientation = headingOrientation
         }
     }
 }

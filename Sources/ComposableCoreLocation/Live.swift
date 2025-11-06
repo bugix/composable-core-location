@@ -1,21 +1,21 @@
 import ConcurrencyExtras
 import CoreLocation
 
-extension LocationManager {
+extension LocationManager: DependencyKey {
     /// The live implementation of the `LocationManager` interface. This implementation is capable of
     /// creating real `CLLocationManager` instances, listening to its delegate methods, and invoking
     /// its methods. You will typically use this when building for the simulator or device:
     ///
     /// ```swift
     /// let store = Store(
-    ///   initialState: AppState(),
-    ///   reducer: appReducer,
-    ///   environment: AppEnvironment(
-    ///     locationManager: LocationManager.live
-    ///   )
+    ///     initialState: AppState(),
+    ///     reducer: appReducer,
+    ///     environment: AppEnvironment(
+    ///       locationManager: LocationManager.live
+    ///     )
     /// )
     /// ```
-    public static var live: Self {
+    public static var liveValue: Self {
         let task = Task<LocationManagerSendableBox, Never> { @MainActor in
             let manager = CLLocationManager()
             let delegate = LocationManagerDelegate()
@@ -229,5 +229,12 @@ private final class LocationManagerDelegate: NSObject, CLLocationManagerDelegate
 
     func locationManager(_ manager: CLLocationManager, didVisit visit: CLVisit) {
         send(.didVisit(Visit(visit: visit)))
+    }
+}
+
+extension DependencyValues {
+    var locationManager: LocationManager {
+        get { self[LocationManager.self] }
+        set { self[LocationManager.self] = newValue }
     }
 }

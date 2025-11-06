@@ -2,9 +2,9 @@ import Combine
 import ComposableArchitecture
 import ComposableCoreLocation
 import CoreLocation
+import LocationManagerMobile
 import MapKit
 import XCTest
-import LocationManagerMobile
 
 class LocationManagerTests: XCTestCase {
     func testRequestLocation_Allow() {
