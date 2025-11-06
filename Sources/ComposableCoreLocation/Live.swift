@@ -233,7 +233,7 @@ private final class LocationManagerDelegate: NSObject, CLLocationManagerDelegate
 }
 
 extension DependencyValues {
-    var locationManager: LocationManager {
+    public var locationManager: LocationManager {
         get { self[LocationManager.self] }
         set { self[LocationManager.self] = newValue }
     }
