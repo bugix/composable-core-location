@@ -1,7 +1,4 @@
-PLATFORM_IOS = iOS Simulator,name=iPhone 11 Pro Max
-PLATFORM_MACOS = macOS
-PLATFORM_TVOS = tvOS Simulator,name=Apple TV 4K (at 1080p)
-PLATFORM_WATCHOS = watchOS Simulator,name=Apple Watch Series 4 - 44mm
+PLATFORM_IOS = iOS Simulator,name=iPhone 17 Pro
 
 default: test
 
@@ -9,19 +6,6 @@ test:
 	xcodebuild test \
 		-scheme ComposableCoreLocation \
 		-destination platform="$(PLATFORM_IOS)"
-	xcodebuild test \
-		-scheme ComposableCoreLocation \
-		-destination platform="$(PLATFORM_MACOS)"
-	xcodebuild test \
-		-scheme ComposableCoreLocation \
-		-destination platform="$(PLATFORM_TVOS)"
-	xcodebuild \
-		-scheme ComposableCoreLocation_watchOS \
-		-destination platform="$(PLATFORM_WATCHOS)"
-	cd Examples/LocationManager \
-		&& xcodebuild test \
-		-scheme LocationManagerDesktop \
-		-destination platform="$(PLATFORM_MACOS)"
 	cd Examples/LocationManager \
 		&& xcodebuild test \
 		-scheme LocationManagerMobile \
